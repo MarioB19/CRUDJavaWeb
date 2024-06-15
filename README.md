@@ -1,1 +1,1 @@
-CRUD Made With Java using JSP, Serverlet and MySQL
+CRUD Made With Java using JSP, Servlet and MySQL
