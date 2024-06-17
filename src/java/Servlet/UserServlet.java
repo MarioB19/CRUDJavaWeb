@@ -4,6 +4,7 @@ import DAO.UserDAO;
 import Model.User;
 import Utilities.HashUtil;
 import Utilities.Validator;
+import rmi.UserService;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -16,14 +17,29 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import rmi.UserService;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @WebServlet("/")
 public class UserServlet extends HttpServlet {
+
     private static final long serialVersionUID = 1L;
     private UserDAO userDAO;
+    private UserService userService;
 
     public void init() {
         userDAO = new UserDAO();
+        try {
+            Registry registry = LocateRegistry.getRegistry("192.168.100.20", 1099);
+            userService = (UserService) registry.lookup("UserService");
+            System.out.println("UserService initialized successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to initialize UserService: " + e.getMessage());
+        }
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -32,7 +48,6 @@ public class UserServlet extends HttpServlet {
         String fromIndex = request.getParameter("fromIndex");
         String fromList = request.getParameter("fromList");
 
-       
         if ("true".equals(fromIndex)) {
             session.setAttribute("fromIndex", "true");
             session.removeAttribute("fromList");
@@ -47,9 +62,8 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         String action = request.getServletPath();
-        
-         //Acciones CRUD
-         try {
+
+        try {
             switch (action) {
                 case "/insert":
                     insertUser(request, response);
@@ -57,17 +71,16 @@ public class UserServlet extends HttpServlet {
                 case "/delete":
                     deleteUser(request, response);
                     return;
-              
                 case "/update":
                     updateUser(request, response);
                     return;
-  
+                case "/calculateAverageAge":
+                    calculateAverageAge(request, response);
+                    return;
             }
         } catch (SQLException ex) {
             throw new ServletException(ex);
         }
-
-
 
         if (session == null) {
             response.sendRedirect("index.jsp");
@@ -80,26 +93,22 @@ public class UserServlet extends HttpServlet {
         }
 
         boolean isAccessAllowed = false;
-        
+
         if ("/list".equals(action) && "true".equals(session.getAttribute("fromIndex"))) {
             isAccessAllowed = true;
-             session.removeAttribute("fromList");
+            session.removeAttribute("fromList");
             session.removeAttribute("fromIndex");
-         
         } else if (("/new".equals(action) || "/edit".equals(action)) && "true".equals(session.getAttribute("fromList"))) {
             isAccessAllowed = true;
-              session.removeAttribute("fromList");
+            session.removeAttribute("fromList");
             session.removeAttribute("fromIndex");
-           
         }
+
         if (!isAccessAllowed) {
-          
             response.sendRedirect("index.jsp");
             return;
         }
 
-       
-    //Vistas
         try {
             switch (action) {
                 case "/new":
@@ -110,9 +119,6 @@ public class UserServlet extends HttpServlet {
                     break;
                 case "/list":
                     listUser(request, response);
-                    break;
-                case "/future":
-                    showFutureAction(request, response);
                     break;
                 default:
                     listUser(request, response);
@@ -146,6 +152,19 @@ public class UserServlet extends HttpServlet {
         request.setAttribute("user", existingUser);
         request.setAttribute("debugMessage", "Showing edit form for user with ID: " + id);
         RequestDispatcher dispatcher = request.getRequestDispatcher("views/user-form.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void calculateAverageAge(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+        List<User> users = userService.selectAllUsers();
+        List<String> birthDates = new ArrayList<>();
+        for (User user : users) {
+            birthDates.add(user.getFechaNacimiento());
+        }
+        double averageAge = userService.calculateAverageAge(birthDates);
+        request.setAttribute("averageAge", averageAge);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("views/average-age.jsp");
         dispatcher.forward(request, response);
     }
 

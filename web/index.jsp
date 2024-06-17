@@ -19,9 +19,9 @@
                 <input type="hidden" name="fromIndex" value="true">
                 <button type="submit" class="btn btn-primary btn-lg">Listar Usuarios (CRUD)</button>
             </form>
-            <form action="future" method="post">
+            <form action="calculateAverageAge" method="post">
                 <input type="hidden" name="fromIndex" value="true">
-                <button type="submit" class="btn btn-secondary btn-lg">Acción Futura</button>
+                <button type="submit" class="btn btn-secondary btn-lg">Calcular Promedio de Edad</button>
             </form>
         </nav>
         <% if (debugMessage != null) { %>

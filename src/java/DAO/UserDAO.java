@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
-        private String jdbcURL = "jdbc:mysql://localhost:3306/crud_users_db";
+        private String jdbcURL = "jdbc:mysql://localhost:3307/crud_users_db";
     private String jdbcUsername = "root";
-    private String jdbcPassword = "";
+    private String jdbcPassword = "root";
 
     private static final String INSERT_USERS_SQL = "INSERT INTO users (fechaNacimiento, nombreCompleto, correoElectronico, password) VALUES (?, ?, ?, ?)";
     private static final String SELECT_USER_BY_ID = "SELECT id, fechaNacimiento, nombreCompleto, correoElectronico, password FROM users WHERE id = ?";
