@@ -2,6 +2,7 @@ package Servlet;
 
 import DAO.UserDAO;
 import Model.User;
+import RMI.RMIClient;
 import Utilities.HashUtil;
 import Utilities.Validator;
 
@@ -16,14 +17,18 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @WebServlet("/")
 public class UserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private UserDAO userDAO;
+    private RMIClient rmiClient;
 
     public void init() {
         userDAO = new UserDAO();
+        rmiClient = new RMIClient();
+
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -81,7 +86,7 @@ public class UserServlet extends HttpServlet {
 
         boolean isAccessAllowed = false;
         
-        if ("/list".equals(action) && "true".equals(session.getAttribute("fromIndex"))) {
+        if (("/list".equals(action) || "/rmi-birthdate".equals(action)) && "true".equals(session.getAttribute("fromIndex"))) {
             isAccessAllowed = true;
              session.removeAttribute("fromList");
             session.removeAttribute("fromIndex");
@@ -92,8 +97,12 @@ public class UserServlet extends HttpServlet {
             session.removeAttribute("fromIndex");
            
         }
+        
+        
+        
+        
+        
         if (!isAccessAllowed) {
-          
             response.sendRedirect("index.jsp");
             return;
         }
@@ -111,9 +120,10 @@ public class UserServlet extends HttpServlet {
                 case "/list":
                     listUser(request, response);
                     break;
-                case "/future":
-                    showFutureAction(request, response);
+                case "/rmi-birthdate":
+                    processRmiBirthdate(request, response);
                     break;
+                 
                 default:
                     listUser(request, response);
                     break;
@@ -232,11 +242,19 @@ public class UserServlet extends HttpServlet {
         request.setAttribute("debugMessage", "User deleted successfully");
         response.sendRedirect("listView");
     }
+    
+    
+    private void processRmiBirthdate(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, SQLException {
+        List<User> listUser = userDAO.selectAllUsers();
+        List<String> birthdates = listUser.stream().map(User::getFechaNacimiento).collect(Collectors.toList());
+        double averageAge = rmiClient.calculateAverageAge(birthdates);
 
-    private void showFutureAction(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        request.setAttribute("debugMessage", "Showing future action page");
-        RequestDispatcher dispatcher = request.getRequestDispatcher("views/future-action.jsp");
+        request.setAttribute("averageAge", averageAge);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("views/rmi-result.jsp");
         dispatcher.forward(request, response);
     }
+
+
+    
 }

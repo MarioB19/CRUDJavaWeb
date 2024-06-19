@@ -184,12 +184,13 @@
         <property name="excludes" value=""/>
         <property name="runmain.jvmargs" value=""/>
         <path id="endorsed.classpath.path" path="${endorsed.classpath}"/>
-        <condition else="" property="endorsed.classpath.cmd.line.arg" value="-Xbootclasspath/p:'${toString:endorsed.classpath.path}'">
-            <and>
-                <isset property="endorsed.classpath"/>
-                <length length="0" string="${endorsed.classpath}" when="greater"/>
-            </and>
-        </condition>
+      <condition else="" property="endorsed.classpath.cmd.line.arg" value="">
+    <and>
+        <isset property="endorsed.classpath"/>
+        <length length="0" string="${endorsed.classpath}" when="greater"/>
+    </and>
+</condition>
+
         <condition else="false" property="jdkBug6558476">
             <and>
                 <matches pattern="1\.[56]" string="${java.specification.version}"/>
