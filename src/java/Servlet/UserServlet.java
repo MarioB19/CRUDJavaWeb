@@ -2,7 +2,7 @@ package Servlet;
 
 import DAO.UserDAO;
 import Model.User;
-import RMI.RMIClient;
+import Code.RMIClient;
 import Utilities.HashUtil;
 import Utilities.Validator;
 
@@ -241,8 +241,10 @@ public class UserServlet extends HttpServlet {
     
     private void processRmiBirthdate(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
+        
         List<User> listUser = userDAO.selectAllUsers();
         List<String> birthdates = listUser.stream().map(User::getFechaNacimiento).collect(Collectors.toList());
+        
         double averageAge = rmiClient.calculateAverageAge(birthdates);
 
         request.setAttribute("averageAge", averageAge);

@@ -2,12 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package RMI;
+package Code;
 
 /**
  *
  * @author brand
  */
+
+
+
+import RMI.UserService;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
@@ -17,7 +21,7 @@ public class RMIClient {
 
     public RMIClient() {
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+            Registry registry = LocateRegistry.getRegistry("192.168.100.91", 1099);
             userService = (UserService) registry.lookup("UserService");
         } catch (Exception e) {
             e.printStackTrace();
