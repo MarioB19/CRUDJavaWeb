@@ -95,12 +95,7 @@ public class UserServlet extends HttpServlet {
             isAccessAllowed = true;
               session.removeAttribute("fromList");
             session.removeAttribute("fromIndex");
-           
         }
-        
-        
-        
-        
         
         if (!isAccessAllowed) {
             response.sendRedirect("index.jsp");
